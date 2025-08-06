@@ -1,0 +1,57 @@
+{% url 'home' as home_url %}
+{% url 'library' as library_url %}
+{% url 'register' as register_url %}
+{% url 'login' as login_url %}
+{% url 'borrows' as borrows_url %}
+{% load static %}
+
+{% if user.is_authenticated %}
+{% include 'partials/modal-logout.html' %}
+{% endif %}
+
+<nav class="navbar">
+    <ul class="navbar-nav">
+        <li class="nav-item {% if request.path == home_url %}active{%endif%}">
+            <a class="nav-link" href="{{home_url}}">Home</a>
+        </li>
+        {% with request.path|slice:"0:9" as path_prefix %}
+        <li class="nav-item {% if request.path == library_url or path_prefix == "/library/" %}active{% endif %}">
+            <a class="nav-link" href="{{library_url}}">Books</a>
+        </li>
+        {% endwith %}
+        <li class="nav-item dropdown-menu">
+            <div class="nav-link">Genres</div>
+            <div class="nav dropdown-content" style="max-width: 600px;">
+                {% if genres %}
+                {% for genre in genres %}
+                <a href="/library/genre/{{genre.name|lower}}">{{ genre.name }}</a>
+                {% endfor %}
+                {% endif %}
+            </div>
+        </li>
+        {% if user.is_authenticated %}
+        <li class="nav-item dropdown-menu" style="max-width: 300px;">
+            <div class="nav-link"><b>Profile</b></div>
+            <div class="nav dropdown-content">
+                <span><b>{{user.username}}</b></span>
+                <a href="{{borrows_url}}">Borrows</a>
+                <a id="button-logout">Logout</a>
+            </div>
+        </li>
+        {% else %}
+        <li class="nav-item {% if request.path == login_url %}active{%endif%}">
+            <a class="nav-link" href="{{login_url}}">Login</a>
+        </li>
+        <li class="nav-item {% if request.path == register_url %}active{%endif%}">
+            <a class="nav-link" href="{{register_url}}">Register</a>
+        </li>
+        {% endif %}
+        <li class="navbar-title">
+            <a class="nav-link" href="/">The Library</a>
+        </li>
+    </ul>
+</nav>
+
+{% if user.is_authenticated %}
+<script src="{% static 'scripts/modal-logout.js' %}"></script>
+{% endif %}

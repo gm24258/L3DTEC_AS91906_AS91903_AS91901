@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+{% load static %}
+
+<head>
+    <title>Books | The Library</title>
+    <link rel="stylesheet" href="{% static 'styles/main.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+
+<body>
+    {% include 'partials/navbar.html' %}
+
+    <div class="center">
+        <div class="description">
+            <h1>Books</h1>
+            <span>Browse our entire collection of books available in the library. Click on any book card to view its
+                details, availability, and borrowing history.</span><br>
+            {% if not user.is_authenticated %}
+            <b><span>
+                    You must be logged in to borrow or return books.
+                    <a href="{% url 'login' %}?next={{ request.path }}">Log in</a> or <a
+                        href="{% url 'register' %}?next={{ request.path }}">register</a> to manage your library account.
+                </span></b>
+            {% endif %}
+        </div>
+    </div>
+    <br>
+
+    {% include 'partials/search-bar.html' %}
+    {% include 'partials/featured.html' %}
+    {% include 'partials/footer.html' %}
+
+    <script>
+        window.featuredParams = {
+            page: 'library',
+            genre: null
+        }
+        const genres = {% autoescape off %}{{ genres_json }}{% endautoescape %}
+        const defaultFilter = {
+            sort: 'popular',
+            genres: []
+        }
+    </script>
+    <script src="{% static 'scripts/featured.js' %}"></script>
+    <script src="{% static 'scripts/search-bar-books.js' %}"></script>
+    <script src="{% static 'scripts/search-bar.js' %}"></script>
+    <script src="{% static 'scripts/modal.js' %}"></script>
+    <script src="{% static 'scripts/dropdown.js' %}"></script>
+</body>
+
+</html>

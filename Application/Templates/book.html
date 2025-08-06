@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+{% load static %}
+
+<head>
+    <title>{{book.title}} by {{book.author}} | The Library</title>
+    <link rel="stylesheet" href="{% static 'styles/main.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/book.css' %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+    
+<body>
+    {% if is_staff %}
+    {% include 'partials/modal-delete.html' %}
+    {% endif %}
+    {% if user.is_authenticated %}
+    {% include 'partials/modal-borrow.html' %}
+    {% include 'partials/modal-return.html' %}
+    {% endif %}
+    {% include 'partials/navbar.html' %}
+
+    <div class="center">
+        <div class="container-cover">
+            <img src="/media/{{book.cover}}" alt="{{book.title}} book cover"></img>
+            {% if is_staff %}
+            <button class="container-button admin" id="button-delete">Delete</button>
+            {% endif %}
+        </div>
+        <div class="container-details">
+            <div class="container-header">
+                <span class="container-title">{{book.title}}</span>
+                <span class="container-id">{{book.ISBN}}</span>
+            </div>
+            <span class="container-p">Author: {{book.author}}</span>
+            <span class="container-p">Published: {{book.date_published}}</span>
+            {% with book.genres.all as book_genres %}
+                {% if book_genres.count <= 3 %}
+                    <span class="container-p">Genres: 
+                        {% for book_genre in book_genres %}
+                            <a href="/library/genre/{{book_genre.name|lower}}">{{ book_genre.name }}</a>{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </span>
+                {% else %}
+                    <div class="container-p dropdown-menu">Genres <i class="fa fa-caret-down"></i>
+                        <div class="dropdown-content">
+                            {% for book_genre in book_genres %}
+                                <a href="/library/genre/{{book_genre.name|lower}}">{{ book_genre.name }}</a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endwith %}
+            {% if quantity_error_msg %}
+            <span class="container-p error">{{quantity_error_msg}}</span>
+            {% else %}
+            <span class="container-p">Copies left: {{book.available_quantity}} of {{book.total_quantity}}</span>
+            {% endif %}
+            <span class="container-p container-description">{{book.description}}</span>
+            <div class="container-library">
+                {% if user.is_authenticated %}
+                {% if record is None %}
+                <button class="container-button" id="button-borrow"
+                    {% if book.available_quantity == 0 %} 
+                    disabled
+                    {% endif %}
+                >
+                Borrow
+                </button>
+                {% else %}
+                <button class="container-button" id="button-return">Return</button>
+                <span class="container-button-msg">Borrowed on: {{record.borrow_date|date:"D d M, Y, P"}}</span>
+                <span class="container-button-msg" style="font-weight: bold">Due date: {{record.due_date|date:"D d M, Y, P"}}</span>
+                {% endif %}
+                {% else %}
+                <button class="container-button" disabled>Borrow</button>
+                <span class="container-button-msg">
+                    <a href="{% url 'register' %}?next={{ request.path }}">Sign up</a> or 
+                    <a href="{% url 'login' %}?next={{ request.path }}">login</a> to borrow books!
+                </span>
+                {% endif %}
+            </div>
+        </div>
+    </div> 
+
+    {% include 'partials/footer.html' %}
+
+    <script src="{% static 'scripts/modal.js' %}"></script>
+    <script src="{% static 'scripts/dropdown.js' %}"></script>
+    {% if user.is_authenticated %}
+    <script src="{% static 'scripts/date-time-format.js' %}"></script>
+    {% if record is None %}
+    <script src="{% static 'scripts/modal-borrow.js' %}"></script>
+    <script>
+        const borrowBtn = document.getElementById('button-borrow')
+        if (borrowBtn) {
+            const bookData = {
+                ISBN: '{{ book.ISBN }}',
+                title: '{{ book.title }}',
+                cover: '{{ book.cover }}'
+            }
+            borrowBtn.onclick = () => {
+                borrowBook(bookData)
+            }
+        }
+    </script>
+    {% else %}
+    <script src="{% static 'scripts/modal-return.js' %}"></script>
+    <script>
+        const returnBtn = document.getElementById('button-return')
+        if (returnBtn) {
+            const recordData = {
+                due_date: '{{ record.due_date|date:"D d M, Y, P"}}',
+                book__ISBN: '{{ record.book.ISBN }}',
+                book__title: '{{ record.book.title }}',
+                book__cover: '{{ record.book.cover }}'
+            }
+            returnBtn.onclick = () => {
+                returnBook(recordData)
+            }
+        }
+    </script>
+    {% endif %}
+    {% endif %}
+    {% if is_staff %}
+    <script src="{% static 'scripts/modal-delete.js' %}"></script>
+    <script>
+        const delBtn = document.getElementById('button-delete')
+        if (delBtn) {
+            const bookData = {
+                ISBN: '{{ book.ISBN }}',
+                title: '{{ book.title }}',
+                cover: '{{ book.cover }}'
+            }
+            delBtn.onclick = () => {
+                deleteBook(bookData)
+            }
+        }
+    </script>
+    {% endif %}
+</body>
+
+</html>

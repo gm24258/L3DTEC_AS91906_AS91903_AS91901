@@ -1,0 +1,38 @@
+<div class="search-bar-container">
+    <div class="search-bar-wrapper">
+        <div class="search-filter-container">
+            <img src="/media/filter-close.png" class="search-filter-clear" />
+            <div class="dropdown-menu filter">
+                Filter <i class="fa fa-caret-down"></i>
+                <div class="dropdown-content filter">
+                    <template id="filter-dropdown-column-template">
+                        <div data-filter_name="example_filter" class="dropdown-column filter" tabindex="0">
+                            <span class="column-title">Example Filter</span>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <div class="search-bar-center"><input class="search-bar" id="search"
+                placeholder="Search by ISBN / author / title..."></div>
+    </div>
+    <div class="query-container">
+        <div class="empty-text"></div>
+        <template id="query-item-template">
+            <a class="query-item">
+                <img src="/media/book_covers/placeholder_cover.png" alt="Book cover" />
+                <div class="query-item-details">
+                    <span class="book-title">BOOK NAME</span>
+                    <span class="book-author">by BOOK AUTHOR</span>
+                    <span class="book-isbn id">ISBN: </span>
+                </div>
+            </a>
+        </template>
+    </div>
+    <div class="search-bar-backdrop"> </div>
+</div>
+
+<template id="filter-dropdown-item-template">
+    <a data-filter_value="example" class="dropdown-item filter">Example</a>
+</template>

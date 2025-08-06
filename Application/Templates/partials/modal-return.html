@@ -1,0 +1,18 @@
+<div class="modal" id="modal-return">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Are you sure you want to return?</h2>
+        <div class="modal-preview">
+            <img src="/media/book_covers/placeholder_cover.png"></img>
+            <span class="modal-preview-title">Example Book</span>
+        </div>
+        <span class="modal-subtitle">Date today: <span class="modal-date today">Date</span></span>
+        <span class="modal-subtitle">Date due: <span class="modal-date due">Date</span></span>
+        <form id="modal-return-form" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="return">
+            <div class="modal-submit-wrapper"><button type="submit" class="modal-submit" id="modal_return">Return</button></div>
+        </form>
+        <span class="modal-error"></span>
+    </div>
+</div>

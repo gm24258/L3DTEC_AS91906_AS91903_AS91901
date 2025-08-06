@@ -1,0 +1,13 @@
+<div class="modal" id="modal-logout">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Are you sure you want to logout?</h2>
+        <span class="modal-subtitle centered">You are currently logged in as {{user.username}}.</span>
+        <form id="modal-logout-form" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="logout">
+            <div class="modal-submit-wrapper"><button type="submit" class="modal-submit" id="modal_logout">Logout</button></div>
+        </form>
+        <span class="modal-error"></span>
+    </div>
+</div>

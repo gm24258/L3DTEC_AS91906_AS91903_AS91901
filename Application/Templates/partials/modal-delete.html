@@ -1,0 +1,17 @@
+<div class="modal" id="modal-delete">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Are you sure you want to delete?</h2>
+        <div class="modal-preview">
+            <img src="/media/{{book.cover}}"></img>
+            <span class="modal-preview-title">{{book.title}}</span>
+        </div>
+        <span class="modal-subtitle warning">This will remove all borrow records of this book.</span>
+        <form id="modal-delete-form" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="delete">
+            <div class="modal-submit-wrapper"><button type="submit" class="modal-submit dangerous">Delete</button></div>
+        </form>
+        <span class="modal-error"></span>
+    </div>
+</div>

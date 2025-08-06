@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+{% load static %}
+
+<head>
+    <title>Register | The Library</title>
+    <link rel="stylesheet" href="{% static 'styles/main.css' %}">
+    <link rel="stylesheet" href="{% static 'styles/form.css' %}">
+</head>
+    
+<body>
+    {% include 'partials/navbar.html' %}
+    
+    <div class="center">
+        <div class="description">
+            <h1>Register</h1>
+            <span>Create an account to borrow and return books!</span>
+        </div>
+    </div> 
+    <br>
+    <form id="register-form" method="POST" novalidate>
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="{{form.first_name.id_for_label}}">{{form.first_name.label}}</label>
+            {{form.first_name}}
+            <div class="error" id="error-first_name"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="{{form.last_name.id_for_label}}">{{form.last_name.label}}</label>
+            {{form.last_name}}
+            <div class="error" id="error-last_name"></div>
+        </div>
+        
+        <div class="form-group">
+            <label for="{{form.username.id_for_label}}">{{form.username.label}}</label>
+            {{form.username}}
+            <div class="error" id="error-username"></div>
+        </div>
+        
+        <div class="form-group">
+            <label for="{{form.email.id_for_label}}">{{form.email.label}}</label>
+            {{form.email}}
+            <div class="error" id="error-email"></div>
+        </div>
+        
+        <div class="form-group">
+            <label for="{{form.password1.id_for_label}}">{{form.password1.label}}</label>
+            {{form.password1}}
+            <div class="error" id="error-password1"></div>
+        </div>
+        
+        <div class="form-group">
+            <label for="{{form.password2.id_for_label}}">{{form.password2.label}}</label>
+            {{form.password2}}
+            <div class="error" id="error-password2"></div>
+        </div>
+
+        <button type="submit">Register</button>
+        <div class="form-footer">Already have an account? <a href="{% url 'login' %}">Login</a></div>
+    </form>
+
+    {% include 'partials/footer.html' %}
+    
+    <script src="{% static 'scripts/form-register.js' %}"></script>
+</body>
+
+</html>

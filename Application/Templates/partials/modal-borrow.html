@@ -1,0 +1,19 @@
+<div class="modal" id="modal-borrow">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Are you sure you want to borrow?</h2>
+        <div class="modal-preview">
+            <img src="/media/book_covers/placeholder_cover.png"></img>
+            <span class="modal-preview-title">Example Book</span>
+        </div>
+        <span class="modal-subtitle">You will have to return this book on: <span class="modal-date due">Date</span></span>
+        <span class="modal-subtitle warning">You will NOT be able to return this book until: <span class="modal-date cooldown">Date</span></span>
+        <form id="modal-borrow-form" method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="isbn" id="modal-borrow-isbn" />
+            <input type="hidden" name="action" value="borrow">
+            <div class="modal-submit-wrapper"><button type="submit" class="modal-submit">Borrow</button></div>
+        </form>
+        <span class="modal-error"></span>
+    </div>
+</div>

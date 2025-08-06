@@ -1,0 +1,77 @@
+form {
+    width: 100%;
+    justify-items: center;
+}
+
+.form-group {
+    padding-bottom: 7px;
+    text-align: left;
+    display: block;
+    width: 214px;
+    max-width: 214px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.form-group label:after {
+    content:"\a";
+    white-space: pre;
+}
+
+.form-input[type=text], 
+.form-input[type=password] {
+    border: 2px solid gainsboro;
+    border-radius: 4px;
+    padding: 5px;
+    transition: all 200ms ease-in-out;
+    width: 200px;
+}
+
+.form-input[type=text]:focus, 
+.form-input[type=password]:focus {
+    padding-right: 15px;
+}
+
+.form-footer {
+    margin-top: 20px;
+}
+
+button[type=submit] {
+    display: block;
+    margin-top: 10px;
+    color:white;
+    outline: none;  
+    background-color: #333;
+    border: none;
+    padding: 5px 50px;
+    border-radius: 5px;
+    transition: background-color 100ms ease-in-out;
+    cursor: pointer;
+}
+
+button[type=submit]:hover {
+    background-color: #777;
+}
+
+input, button, .error {
+    font-family: "DM Sans", sans-serif;
+}
+
+.error {
+    color: red;
+    font-size: 10px;
+    opacity: 0;
+    width: 100%;
+    transition: opacity 300ms ease-in-out;
+}
+
+.error:empty {
+    opacity: 0;
+}
+
+.error.show {
+    opacity: 1;
+}
