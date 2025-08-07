@@ -25,6 +25,11 @@ class Genre(models.Model):
 
 
 
+def validate_isbn(value):
+    """Validates if ISBN contains only numbers and is exactly 13 digits"""
+    if len(value) != 13 or not value.isdigit():
+        raise ValidationError("ISBN must be exactly 13 digits.")
+
 class Book(models.Model):
     """
     Represents a book with metadata, stock details, and genre tags.
@@ -39,10 +44,6 @@ class Book(models.Model):
     - Available quantity cannot exceed total quantity.
     """
     
-    def validate_isbn(value):
-        """Validates if ISBN contains only numbers and is exactly 13 digits"""
-        if len(value) != 13 or not value.isdigit():
-            raise ValidationError("ISBN must be exactly 13 digits.")
 
     title = models.CharField(max_length=200)
     author = models.CharField(max_length=100)
