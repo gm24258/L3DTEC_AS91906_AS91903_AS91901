@@ -109,7 +109,7 @@ def view_book(request, isbn):
     # Get book by ISBN or 404
     book = get_object_or_404(Book, ISBN=isbn)
     record = None
-    quantity_error_msg = None
+    book_not_available = None
 
     try:
         # Raise error if no available copies
@@ -119,15 +119,15 @@ def view_book(request, isbn):
         # If user logged in, get current borrow record (if any)
         if request.user.is_authenticated:
             record = BorrowRecord.objects.filter(user=request.user, book=book, return_date__isnull=True).first()
-    except BookNotAvailableError as e:
-        quantity_error_msg = str(e)
+    except BookNotAvailableError:
+        book_not_available = True
 
     genres = list(Genre.objects.values())
 
     context = {
         'book': book,
         'record': record,
-        'quantity_error_msg': quantity_error_msg,
+        'book_not_available': book_not_available,
         'is_staff': request.user.groups.filter(name='Staff').exists(),
         'genres': genres,
     }
@@ -448,6 +448,7 @@ def get_featured_data(request):
         book_data = [
             {
                 'title': book.title,
+                'author': book.author,
                 'ISBN': book.ISBN,
                 'cover': book.cover.name if book.cover else ""
             }

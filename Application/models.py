@@ -55,6 +55,17 @@ class Book(models.Model):
     available_quantity = models.PositiveBigIntegerField(default=0)
     total_quantity = models.PositiveBigIntegerField(default=0)
     borrow_count = models.PositiveBigIntegerField(default=0)
+
+    URGENT_MIN_COPIES = 5
+    URGENT_PERCENTAGE = 0.10
+
+    @property
+    def is_low_stock(self):
+        if self.available_quantity <= self.URGENT_MIN_COPIES:
+            return True
+        if self.total_quantity > 0 and (self.available_quantity / self.total_quantity) <= self.URGENT_PERCENTAGE:
+            return True
+        return False
     
     def clean(self):
         # Ensure available_quantity does not exceed total_quantity.
@@ -93,6 +104,9 @@ class BorrowRecord(models.Model):
     due_date = models.DateTimeField(null=True, blank=True)
     return_date = models.DateTimeField(null=True, blank=True)
 
+    WARNING_DUE = 7
+    CRITICAL_DUE = 3
+
     class Meta:
         verbose_name = "Record"
         verbose_name_plural = "Records" # Admin display name
@@ -107,7 +121,7 @@ class BorrowRecord(models.Model):
 
     def clean(self):
         # Ensure a user cannot borrow the same book
-        already_borrowed = BorrowRecord.objects.filter(user=self.user, book=self.book, return_date__isnull=True)
+        already_borrowed = BorrowRecord.objects.filter(user=self.user, book=self.book, return_date__isnull=True).exclude(pk=self.pk)
         if already_borrowed:
             raise ValidationError({
                 'book': str(BookAlreadyBorrowedError())
@@ -119,6 +133,21 @@ class BorrowRecord(models.Model):
                 'due_date': 'You cannot set the due date equal or earlier than the borrow date.'
             })
 
+    @property
+    def date_status(self):
+        current_time = timezone.now()
+        time_left = self.due_date - current_time if self.due_date else None
+        if time_left:
+            if time_left.days < 0:
+                return "overdue"
+            elif time_left.days < self.CRITICAL_DUE:
+                return "critical"
+            elif time_left.days < self.WARNING_DUE:
+                return "warning"
+            else:
+                return None
+        return None
+    
     @classmethod
     def borrow_book(self, user, book):
         """Borrow a book, if it's available and not already borrowed by the user."""

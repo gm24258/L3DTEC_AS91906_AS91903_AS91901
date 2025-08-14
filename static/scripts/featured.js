@@ -62,6 +62,10 @@ function initializeFeatured() {
                     // Set the book cover image source
                     const bookCover = clonedItem.querySelector('img')
                     bookCover.src = `/media/${book.cover}`
+                    // Set tooltip content with book details
+                    const tooltip = clonedItem.querySelector('.item-tooltip.featured')
+                    tooltip.querySelector('.book-title').textContent = book.title
+                    tooltip.querySelector('.book-author').textContent = `by ${book.author}`
                     // Append the book item to the container row
                     containerRow.appendChild(clonedItem)
                 })

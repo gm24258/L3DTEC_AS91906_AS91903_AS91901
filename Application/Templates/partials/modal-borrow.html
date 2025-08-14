@@ -1,19 +1,26 @@
 <div class="modal" id="modal-borrow">
-    <div class="modal-content">
+    <div class="modal-window">
         <span class="close">&times;</span>
-        <h2>Are you sure you want to borrow?</h2>
-        <div class="modal-preview">
-            <img src="/media/book_covers/placeholder_cover.png"></img>
-            <span class="modal-preview-title">Example Book</span>
+        <div class="modal-content">
+            <h2>Are you sure you want to borrow this book?</h2>
+            <div class="modal-preview">
+                <img src="/media/book_covers/placeholder_cover.png"></img>
+                <span class="modal-preview-title">Example Book</span>
+            </div>
+            <span class="modal-subtitle"><b>Due in:</b> <span class="modal-date due">Date</span></span>
+            <div class="modal-subtitle warning">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
+                    fill="currentColor"><!--!Font Awesome Free v7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                    <path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM320 200C333.3 200 344 210.7 344 224L344 336C344 349.3 333.3 360 320 360C306.7 360 296 349.3 296 336L296 224C296 210.7 306.7 200 320 200zM293.3 416C292.7 406.1 297.6 396.7 306.1 391.5C314.6 386.4 325.3 386.4 333.8 391.5C342.3 396.7 347.2 406.1 346.6 416C347.2 425.9 342.3 435.3 333.8 440.5C325.3 445.6 314.6 445.6 306.1 440.5C297.6 435.3 292.7 425.9 293.3 416z"/>
+                </svg>
+                <span><b>You can't borrow this book again for 1 day after borrowing.</b> You can return it anytime.</span></div>
+            <form id="modal-borrow-form" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="isbn" id="modal-borrow-isbn" />
+                <input type="hidden" name="action" value="borrow">
+                <div class="modal-submit-wrapper"><button type="submit" class="modal-submit">Confirm</button></div>
+            </form>
+            <span class="modal-error"></span>
         </div>
-        <span class="modal-subtitle">You will have to return this book on: <span class="modal-date due">Date</span></span>
-        <span class="modal-subtitle warning">You will NOT be able to return this book until: <span class="modal-date cooldown">Date</span></span>
-        <form id="modal-borrow-form" method="POST">
-            {% csrf_token %}
-            <input type="hidden" name="isbn" id="modal-borrow-isbn" />
-            <input type="hidden" name="action" value="borrow">
-            <div class="modal-submit-wrapper"><button type="submit" class="modal-submit">Borrow</button></div>
-        </form>
-        <span class="modal-error"></span>
     </div>
 </div>

@@ -19,18 +19,23 @@
             <a class="nav-link" href="{{library_url}}">Books</a>
         </li>
         {% endwith %}
-        <li class="nav-item dropdown-menu">
+        <li class="nav-item dropdown-menu" id="nav-genres">
             <div class="nav-link">Genres</div>
             <div class="nav dropdown-content" style="max-width: 600px;">
                 {% if genres %}
                 {% for genre in genres %}
-                <a href="/library/genre/{{genre.name|lower}}">{{ genre.name }}</a>
+                <a href="{{library_url}}/genre/{{genre.name|lower}}">{{ genre.name }}</a>
                 {% endfor %}
                 {% endif %}
             </div>
         </li>
+        {% if is_staff %}
+        <li class="nav-item">
+            <a class="nav-link" href="/admin" target="_blank">Admin Panel</a>
+        </li>
+        {% endif %}
         {% if user.is_authenticated %}
-        <li class="nav-item dropdown-menu" style="max-width: 300px;">
+        <li class="nav-item dropdown-menu" id="nav-profile" style="max-width: 300px;">
             <div class="nav-link"><b>Profile</b></div>
             <div class="nav dropdown-content">
                 <span><b>{{user.username}}</b></span>

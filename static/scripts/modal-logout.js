@@ -24,6 +24,9 @@ logoutBtn.onclick = () => {
 
 // Handle logout confirmation logic
 document.getElementById('modal-logout-form').addEventListener('submit', async function(e) {
+    const button = document.getElementById('modal-logout-form').querySelector('.modal-submit')
+    button.disabled = true
+    
     e.preventDefault()
 
     const form = e.target
@@ -60,5 +63,7 @@ document.getElementById('modal-logout-form').addEventListener('submit', async fu
         logoutErr.textContent = 'An error has occurred!'
         logoutErr.classList.add('show')
         console.error('Fetch error:', error.error || error.message || error)
+    } finally {
+        button.disabled = false
     }
 })

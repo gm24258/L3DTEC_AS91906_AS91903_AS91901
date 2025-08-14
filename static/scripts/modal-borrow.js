@@ -32,11 +32,13 @@ function borrowBook(book) {
     // Display book details and dates in modal
     borrowModal.querySelector('.modal-preview img').src = `/media/${book.cover}`
     borrowModal.querySelector('.modal-preview-title').textContent = book.title
-    borrowModal.querySelector('.modal-date.cooldown').textContent = formatDate(cooldownDate)
     borrowModal.querySelector('.modal-date.due').textContent = formatDate(dueDate)
 
     // Handle borrow confirmation logic
     document.getElementById('modal-borrow-form').addEventListener('submit', async function(e) {
+        const button = document.getElementById('modal-borrow-form').querySelector('.modal-submit')
+        button.disabled = true
+
         e.preventDefault()  
     
         const form = e.target
@@ -77,6 +79,8 @@ function borrowBook(book) {
             modalError.textContent = 'An error has occurred!'
             modalError.classList.add('show')
             console.error('Fetch error:', error.error || error.message || error)
+        } finally {
+            button.disabled = false
         }
     })
 }

@@ -19,7 +19,7 @@ class BookAdmin(admin.ModelAdmin):
     - Missing genre relations are handled gracefully (returns empty list).
     - Django admin handles blank or None values safely by default.
     """
-    list_display = ('title', 'author', 'ISBN', 'date_published', 'available_quantity', 'total_quantity', 'genres_list')
+    list_display = ('title', 'author', 'ISBN', 'date_published', 'available_quantity', 'total_quantity', 'borrow_count', 'genres_list')
     # Sidebar filter for date_published
     list_filter = ['date_published']
     

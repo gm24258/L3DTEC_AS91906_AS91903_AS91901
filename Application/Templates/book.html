@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 {% load static %}
+{% load number_filters %}
 
 <head>
     <title>{{book.title}} by {{book.author}} | The Library</title>
@@ -10,77 +11,132 @@
 </head>
     
 <body>
-    {% if is_staff %}
-    {% include 'partials/modal-delete.html' %}
-    {% endif %}
     {% if user.is_authenticated %}
     {% include 'partials/modal-borrow.html' %}
     {% include 'partials/modal-return.html' %}
     {% endif %}
     {% include 'partials/navbar.html' %}
+    
+    <div class="book-banner" style="background-image:url('/media/{{book.cover}}')" aria-label="{{book.title}} Banner">
+        <div class="banner-content">
+            <img src="/media/{{book.cover}}" alt="{{book.title}} Book Cover" class="book-cover">
 
-    <div class="center">
-        <div class="container-cover">
-            <img src="/media/{{book.cover}}" alt="{{book.title}} book cover"></img>
-            {% if is_staff %}
-            <button class="container-button admin" id="button-delete">Delete</button>
-            {% endif %}
-        </div>
-        <div class="container-details">
-            <div class="container-header">
-                <span class="container-title">{{book.title}}</span>
-                <span class="container-id">{{book.ISBN}}</span>
-            </div>
-            <span class="container-p">Author: {{book.author}}</span>
-            <span class="container-p">Published: {{book.date_published}}</span>
-            {% with book.genres.all as book_genres %}
-                {% if book_genres.count <= 3 %}
-                    <span class="container-p">Genres: 
+            <ul class="book-metadata">
+                <li class="book-title">{{book.title}}</li>
+                <ul class="book-details">
+                    <li>by {{book.author}}</li>
+                    <li>Published {{book.date_published}}</li>
+                    <li>ISBN: {{book.ISBN}}</li>
+                </ul>
+                
+                <ul class="book-genres">
+                    {% with book.genres.all as book_genres %}
                         {% for book_genre in book_genres %}
-                            <a href="/library/genre/{{book_genre.name|lower}}">{{ book_genre.name }}</a>{% if not forloop.last %}, {% endif %}
+                            <li><a href="/library/genre/{{book_genre.name|lower}}">{{book_genre.name}}</a></li>
                         {% endfor %}
-                    </span>
-                {% else %}
-                    <div class="container-p dropdown-menu">Genres <i class="fa fa-caret-down"></i>
-                        <div class="dropdown-content">
-                            {% for book_genre in book_genres %}
-                                <a href="/library/genre/{{book_genre.name|lower}}">{{ book_genre.name }}</a>
-                            {% endfor %}
-                        </div>
+                    {% endwith %}
+                </ul>
+
+                <div class="book-description">
+                    {{book.description}}
+                </div>
+            </ul>
+        </div>
+    </div>
+
+    <div class="container-book-library">
+        <div class="book-library">
+            <div class="book-library-left">
+                <div class="book-availability">
+                    {% if book_not_available %}
+                    <div class="book-status critical">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
+                            fill="currentColor"><!--!Font Awesome Free v7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                            <path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM320 200C333.3 200 344 210.7 344 224L344 336C344 349.3 333.3 360 320 360C306.7 360 296 349.3 296 336L296 224C296 210.7 306.7 200 320 200zM293.3 416C292.7 406.1 297.6 396.7 306.1 391.5C314.6 386.4 325.3 386.4 333.8 391.5C342.3 396.7 347.2 406.1 346.6 416C347.2 425.9 342.3 435.3 333.8 440.5C325.3 445.6 314.6 445.6 306.1 440.5C297.6 435.3 292.7 425.9 293.3 416z"/>
+                        </svg>
+                        This book is no longer available
                     </div>
+                    {% elif book.is_low_stock %}
+                    <div class="book-status warning">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
+                            fill="currentColor"><!--!Font Awesome Free v7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                            <path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM320 200C333.3 200 344 210.7 344 224L344 336C344 349.3 333.3 360 320 360C306.7 360 296 349.3 296 336L296 224C296 210.7 306.7 200 320 200zM293.3 416C292.7 406.1 297.6 396.7 306.1 391.5C314.6 386.4 325.3 386.4 333.8 391.5C342.3 396.7 347.2 406.1 346.6 416C347.2 425.9 342.3 435.3 333.8 440.5C325.3 445.6 314.6 445.6 306.1 440.5C297.6 435.3 292.7 425.9 293.3 416z"/>
+                        </svg>
+                        Hurry! Only a few copies left
+                    </div>
+                    {% else %}
+                    <div class="book-status correct">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
+                            fill="currentColor"><!--!Font Awesome Free v7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                            <path d="M530.8 134.1C545.1 144.5 548.3 164.5 537.9 178.8L281.9 530.8C276.4 538.4 267.9 543.1 258.5 543.9C249.1 544.7 240 541.2 233.4 534.6L105.4 406.6C92.9 394.1 92.9 373.8 105.4 361.3C117.9 348.8 138.2 348.8 150.7 361.3L252.2 462.8L486.2 141.1C496.6 126.8 516.6 123.6 530.9 134z"/>
+                        </svg>
+                        Book is available
+                    </div>
+                    {% endif %}
+                    <span class="book-quantity-error"></span>
+                    <span>{{ book.available_quantity|shorten_number }} of {{ book.total_quantity|shorten_number }} copies available</span>
+                    <span class="book-caption">{{ book.borrow_count|shorten_number }} have borrowed this</span>
+                </div>
+
+                
+                {% if record is not None %}
+                <div class="book-return-status">
+                    {% if record.date_status == "overdue" %}
+                    <div class="book-status critical">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
+                            fill="currentColor"><!--!Font Awesome Free v7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                            <path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM320 200C333.3 200 344 210.7 344 224L344 336C344 349.3 333.3 360 320 360C306.7 360 296 349.3 296 336L296 224C296 210.7 306.7 200 320 200zM293.3 416C292.7 406.1 297.6 396.7 306.1 391.5C314.6 386.4 325.3 386.4 333.8 391.5C342.3 396.7 347.2 406.1 346.6 416C347.2 425.9 342.3 435.3 333.8 440.5C325.3 445.6 314.6 445.6 306.1 440.5C297.6 435.3 292.7 425.9 293.3 416z"/>
+                        </svg>
+                        This book is overdue!
+                    </div>
+                    {% elif record.date_status %}
+                    <div class="book-status warning">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
+                            fill="currentColor"><!--!Font Awesome Free v7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                            <path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM320 200C333.3 200 344 210.7 344 224L344 336C344 349.3 333.3 360 320 360C306.7 360 296 349.3 296 336L296 224C296 210.7 306.7 200 320 200zM293.3 416C292.7 406.1 297.6 396.7 306.1 391.5C314.6 386.4 325.3 386.4 333.8 391.5C342.3 396.7 347.2 406.1 346.6 416C347.2 425.9 342.3 435.3 333.8 440.5C325.3 445.6 314.6 445.6 306.1 440.5C297.6 435.3 292.7 425.9 293.3 416z"/>
+                        </svg>
+                        Reminder: Your book is due soon
+                    </div>
+                    {% else %}
+                    <div class="book-status correct">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640"
+                            fill="currentColor"><!--!Font Awesome Free v7.0.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                            <path d="M530.8 134.1C545.1 144.5 548.3 164.5 537.9 178.8L281.9 530.8C276.4 538.4 267.9 543.1 258.5 543.9C249.1 544.7 240 541.2 233.4 534.6L105.4 406.6C92.9 394.1 92.9 373.8 105.4 361.3C117.9 348.8 138.2 348.8 150.7 361.3L252.2 462.8L486.2 141.1C496.6 126.8 516.6 123.6 530.9 134z"/>
+                        </svg>
+                        You can safely return this book
+                    </div>
+                    {% endif %}
+                    <span><b>Due in:</b> {{record.due_date|date:"D d M, Y, P"}}</span>
+                    <span class="book-caption">You borrowed this on: {{record.borrow_date|date:"D d M, Y, P"}}</span>
+                </div>
                 {% endif %}
-            {% endwith %}
-            {% if quantity_error_msg %}
-            <span class="container-p error">{{quantity_error_msg}}</span>
-            {% else %}
-            <span class="container-p">Copies left: {{book.available_quantity}} of {{book.total_quantity}}</span>
-            {% endif %}
-            <span class="container-p container-description">{{book.description}}</span>
-            <div class="container-library">
-                {% if user.is_authenticated %}
-                {% if record is None %}
+            </div>
+
+            <div class="book-actions">
+                {% if record is None%}
                 <button class="container-button" id="button-borrow"
-                    {% if book.available_quantity == 0 %} 
+                    {% if not user.is_authenticated %}
+                    disabled
+                    {% elif book.available_quantity == 0 %} 
                     disabled
                     {% endif %}
-                >
-                Borrow
-                </button>
-                {% else %}
-                <button class="container-button" id="button-return">Return</button>
-                <span class="container-button-msg">Borrowed on: {{record.borrow_date|date:"D d M, Y, P"}}</span>
-                <span class="container-button-msg" style="font-weight: bold">Due date: {{record.due_date|date:"D d M, Y, P"}}</span>
-                {% endif %}
-                {% else %}
-                <button class="container-button" disabled>Borrow</button>
-                <span class="container-button-msg">
+                >Borrow</button>
+                <span class="button-caption">
+                    {% if not user.is_authenticated %}
                     <a href="{% url 'register' %}?next={{ request.path }}">Sign up</a> or 
                     <a href="{% url 'login' %}?next={{ request.path }}">login</a> to borrow books!
+                    {% endif %}
                 </span>
+                {% else %}
+                <button class="container-button" id="button-return">Return</button>
+                <span class="button-caption"></span>
+                {% endif %}
+                {% if is_staff %}
+                <a class="container-button" id="button-manage" href="/admin/Application/book/{{book.id}}/change" target="_blank">Edit in admin</a>
                 {% endif %}
             </div>
         </div>
-    </div> 
+    </div>
 
     {% include 'partials/footer.html' %}
 
@@ -99,6 +155,11 @@
                 cover: '{{ book.cover }}'
             }
             borrowBtn.onclick = () => {
+                // Rate limit the borrow button to prevent spamming
+                borrowBtn.disabled = true
+                setTimeout(() => {
+                    borrowBtn.disabled = false
+                }, 3000)
                 borrowBook(bookData)
             }
         }
@@ -115,27 +176,15 @@
                 book__cover: '{{ record.book.cover }}'
             }
             returnBtn.onclick = () => {
+                returnBtn.disabled = true
+                setTimeout(() => {
+                    returnBtn.disabled = false
+                }, 3000)
                 returnBook(recordData)
             }
         }
     </script>
     {% endif %}
-    {% endif %}
-    {% if is_staff %}
-    <script src="{% static 'scripts/modal-delete.js' %}"></script>
-    <script>
-        const delBtn = document.getElementById('button-delete')
-        if (delBtn) {
-            const bookData = {
-                ISBN: '{{ book.ISBN }}',
-                title: '{{ book.title }}',
-                cover: '{{ book.cover }}'
-            }
-            delBtn.onclick = () => {
-                deleteBook(bookData)
-            }
-        }
-    </script>
     {% endif %}
 </body>
 
