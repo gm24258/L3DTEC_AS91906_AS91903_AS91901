@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.core.validators import MinValueValidator
 from django.utils.html import format_html
 from django.urls import reverse
+from django.conf import settings
 from .exceptions import *
 from datetime import timedelta
 
@@ -90,12 +91,12 @@ class BorrowRecord(models.Model):
     Features:
     - Automatically sets a 14-day due date.
     - Ensures only one active borrow per user-book pair.
-    - Enforces a 24-hour return cooldown.
+    - Enforces a 24-hour borrow cooldown.
 
     Error Handling:
     - Prevents duplicate borrow records.
     - Ensures logical borrow/due dates.
-    - Raises errors for invalid operations (e.g., returning too soon, book not found).
+    - Raises errors for invalid operations (e.g., borrowing too soon, book not found).
     """
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='borrows')
@@ -103,9 +104,6 @@ class BorrowRecord(models.Model):
     borrow_date = models.DateTimeField(default=timezone.now)
     due_date = models.DateTimeField(null=True, blank=True)
     return_date = models.DateTimeField(null=True, blank=True)
-
-    WARNING_DUE = 7
-    CRITICAL_DUE = 3
 
     class Meta:
         verbose_name = "Record"
@@ -116,7 +114,7 @@ class BorrowRecord(models.Model):
     
     def save(self, *args, **kwargs):
         if not self.due_date:
-            self.due_date = self.borrow_date + timedelta(days=14)
+            self.due_date = self.borrow_date + timedelta(days=settings.DUE_DATE_DAYS)
         super().save(*args, **kwargs)
 
     def clean(self):
@@ -128,7 +126,7 @@ class BorrowRecord(models.Model):
             })
         
         # Ensure the record's due date cannot be set to the borrow date or earlier
-        if self.borrow_date >= self. due_date:
+        if self.borrow_date >= self.due_date:
             raise ValidationError({
                 'due_date': 'You cannot set the due date equal or earlier than the borrow date.'
             })
@@ -140,9 +138,24 @@ class BorrowRecord(models.Model):
         if time_left:
             if time_left.days < 0:
                 return "overdue"
-            elif time_left.days < self.CRITICAL_DUE:
+            elif time_left.days < settings.CRITICAL_RETURN_DUE_DAYS:
                 return "critical"
-            elif time_left.days < self.WARNING_DUE:
+            elif time_left.days < settings.WARNING_RETURN_DUE_DAYS:
+                return "warning"
+            else:
+                return None
+        return None
+    
+    @property
+    def recently_borrowed(self):
+        current_time = timezone.now()
+        time_left = self.due_date - current_time if self.due_date else None
+        if time_left:
+            if time_left.days < 0:
+                return "overdue"
+            elif time_left.days < settings.CRITICAL_RETURN_DUE_DAYS:
+                return "critical"
+            elif time_left.days < settings.WARNING_RETURN_DUE_DAYS:
                 return "warning"
             else:
                 return None
@@ -160,6 +173,17 @@ class BorrowRecord(models.Model):
         if already_borrowed:
             raise BookAlreadyBorrowedError()
         
+        # Record found between the same user and book that has been recently returned; borrowing is on cooldown
+        recent_borrow = self.objects.filter(user=user, book=book, return_date__isnull=False).order_by('-return_date').first()
+
+        if recent_borrow:
+            # Calculate days since last return
+            days_since_return = (timezone.now() - recent_borrow.return_date).days
+            
+            # Check if still in cooldown period
+            if days_since_return < settings.BORROW_COOLDOWN_DAYS:
+                raise BookBorrowCooldownError()
+        
         record = self.objects.create(user=user,book=book)
         book.available_quantity -= 1
         book.save()
@@ -173,33 +197,18 @@ class BorrowRecord(models.Model):
             book=book,
             return_date__isnull=True
         ).order_by('-due_date').first()
-        
-        current_time = timezone.now()
-        cooldown = timezone.localtime(record.borrow_date + timedelta(hours=24))
 
         if record is None:
             raise BookRecordNotFoundError()
-        elif record.borrow_date and current_time < cooldown:
-            # Format cooldown time for display
-            formatted_date = cooldown.strftime('%a %d %b, %Y, %I:%M%p').lstrip("0").replace(" 0", " ").replace('AM', ' a.m.').replace('PM', ' p.m.')
-            raise BookReturnCooldownError(f"You cannot return this book until: {formatted_date}")
         
-        # Finalize return
-        record.return_date = current_time
+        # Finalize return and set return date to current date
+        record.return_date = timezone.now()
         record.save()
         
         book.borrow_count += 1
         book.available_quantity += 1
         book.save()
         return record
-
-    @classmethod
-    def delete_book(self, book):
-        """Delete a book from the system, or raise an error if it doesn't exist."""
-        try:
-            book.delete()
-        except book.DoesNotExist:
-            raise BookNotFoundError('This book has already been deleted!')
 
 
 

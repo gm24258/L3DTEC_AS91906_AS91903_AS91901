@@ -17,9 +17,11 @@
             <h1>Hello {{user.first_name}}!</h1>
             <span>Welcome back to the The Library.</span><br>
             <span>You can view, add, borrow, or return books from our collection.</span><br>
+            <span>Click on any book card to view its details, availability, and borrowing history.</span><br>
             {% else %}
             <h1>Welcome to The Library!</h1>
             <span>Explore our collection of books, available to all our users!</span><br>
+            <span>Click on any book card to view its details, availability, and borrowing history.</span><br>
             <span>
                 <a href="{% url 'login' %}?next={{ request.path }}">Log in</a> to your account, or 
                 <a href="{% url 'register' %}?next={{ request.path }}">register</a> for a new account.

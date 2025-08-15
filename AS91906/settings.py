@@ -127,3 +127,9 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Record related settings
+WARNING_RETURN_DUE_DAYS = 7
+CRITICAL_RETURN_DUE_DAYS = 3
+BORROW_COOLDOWN_DAYS = 1
+DUE_DATE_DAYS = 14

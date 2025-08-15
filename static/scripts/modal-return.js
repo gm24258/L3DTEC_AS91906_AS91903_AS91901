@@ -27,8 +27,8 @@ function returnBook(record) {
     // Display book details and dates in modal
     returnModal.querySelector('.modal-preview img').src = `/media/${record.book__cover}`
     returnModal.querySelector('.modal-preview-title').textContent = record.book__title
-    returnModal.querySelector('.modal-date.due').textContent = record.due_date 
-    returnModal.querySelector('.modal-date.today').textContent = formatDate(todayDate)
+    returnModal.querySelector('.modal-caption .date.due').textContent = record.due_date 
+    returnModal.querySelector('.modal-caption .date.today').textContent = formatDate(todayDate)
 
     // Handle return confirmation logic
     document.getElementById('modal-return-form').addEventListener('submit', async function(e) {

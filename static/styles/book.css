@@ -204,6 +204,9 @@
     font-size: 15px;
     text-align: center;
     text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .container-button:first-child {
@@ -218,6 +221,12 @@
 
 .container-button:not(:disabled):hover {
     background-color: #777;
+}
+
+.container-button svg {
+    width: 26px;
+    height: 26px;
+    margin-left: 4px;
 }
 
 #button-manage {

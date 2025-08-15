@@ -91,7 +91,7 @@ function searchQuery(query = '', active = true) {
                 emptyText.remove()
                 queryContainer.appendChild(emptyText)
             }
-
+            
             // Render each book result into the DOM
             data.books.forEach(book => {
                 const clone = queryItem.content.cloneNode(true)

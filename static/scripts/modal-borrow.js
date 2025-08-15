@@ -32,7 +32,7 @@ function borrowBook(book) {
     // Display book details and dates in modal
     borrowModal.querySelector('.modal-preview img').src = `/media/${book.cover}`
     borrowModal.querySelector('.modal-preview-title').textContent = book.title
-    borrowModal.querySelector('.modal-date.due').textContent = formatDate(dueDate)
+    borrowModal.querySelector('.modal-caption .date.due').textContent = formatDate(dueDate)
 
     // Handle borrow confirmation logic
     document.getElementById('modal-borrow-form').addEventListener('submit', async function(e) {

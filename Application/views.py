@@ -7,6 +7,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.http import require_POST
 from django.db.models import Case, When, F, Value, DateTimeField, BooleanField
 from django.db.models.functions import Coalesce
+from django.conf import settings
 from .models import *
 from .forms import *
 from .exceptions import *
@@ -109,25 +110,44 @@ def view_book(request, isbn):
     # Get book by ISBN or 404
     book = get_object_or_404(Book, ISBN=isbn)
     record = None
-    book_not_available = None
+    errors = {}
 
     try:
         # Raise error if no available copies
         if book.available_quantity == 0:
-            raise BookNotAvailableError("No more copies available!")
+            raise BookNotAvailableError()
+        
         
         # If user logged in, get current borrow record (if any)
         if request.user.is_authenticated:
             record = BorrowRecord.objects.filter(user=request.user, book=book, return_date__isnull=True).first()
-    except BookNotAvailableError:
-        book_not_available = True
+            
+            # Indicate cooldown to the frontend when a user has recently returned the book for less than one day
+            recent_borrow = BorrowRecord.objects.filter(user=request.user, book=book, return_date__isnull=False).order_by('-return_date').first()
+
+            if recent_borrow:
+                # Calculate days since last return
+                days_since_return = (timezone.now() - recent_borrow.return_date).days
+                
+                # Check if still in cooldown period
+                if days_since_return < settings.BORROW_COOLDOWN_DAYS:
+                    ready_date =  recent_borrow.return_date + timedelta(days=settings.BORROW_COOLDOWN_DAYS)
+
+                    errors['borrow_cooldown'] = {
+                        'message': BookBorrowCooldownError(),
+                        'date': recent_borrow.return_date,
+                        'ready_date': ready_date
+                    }
+    except BookNotAvailableError as e:
+        errors['quantity_error'] = str(e)
+        
 
     genres = list(Genre.objects.values())
 
     context = {
         'book': book,
         'record': record,
-        'book_not_available': book_not_available,
+        'errors': errors,
         'is_staff': request.user.groups.filter(name='Staff').exists(),
         'genres': genres,
     }
@@ -162,7 +182,7 @@ def view_borrows(request):
 
 
 """
-POST VIEWS: Functions to handle POST requests for functions like borrowing, returning, and deleting books.
+POST VIEWS: Functions to handle POST requests for functions like borrowing, and returning books.
 """
 @require_POST
 def borrow_book(request):
@@ -196,6 +216,8 @@ def borrow_book(request):
         return JsonResponse({'success': True})
     except BookNotAvailableError as e:
         return JsonResponse({'success': False, 'modal_error': str(e)})
+    except BookBorrowCooldownError as e:
+        return JsonResponse({'success': False, 'modal_error': 'You have already borrowed this book recently.'})
     except BookAlreadyBorrowedError as e:
         return JsonResponse({'success': False, 'modal_error': str(e)})
     except ValidationError as e:
@@ -236,47 +258,9 @@ def return_book(request):
         return JsonResponse({'success': True})
     except BookRecordNotFoundError as e:
         return JsonResponse({'success': False, 'modal_error': str(e)})
-    except BookReturnCooldownError as e:
-        return JsonResponse({'success': False, 'modal_error': str(e)})
     except ValidationError as e:
         return JsonResponse({'success': False, 'log_error': f'An error has occurred!\n{str(e)}'})
-
-
-
-@require_POST
-def delete_book(request):
-    """
-    Allows staff to delete a book from the system.
-
-    Features:
-    - Accepts ISBN via GET param.
-    - Deletes book if exists.
-    - Redirects to library on success.
-
-    Error Handling:
-    - Only allows staff users.
-    - Handles missing ISBN or book not found.
-    - Returns custom errors as JSON for frontend handling, while other errors as ValidationErrors are printed to the console.
-    """
-    
-    # Only authenticated staff users allowed
-    if not request.user.is_authenticated and not request.user.groups.filter(name='Staff').exists() :
-        return JsonResponse({'success': False, 'modal_error': 'An error has occurred!'})
-    
-    isbn = request.GET.get('isbn')
-    if not isbn:
-        return JsonResponse({'success': False, 'modal_error': 'Missing required parameter: isbn'})
-    
-    book = get_object_or_404(Book, ISBN=isbn)
-    try:
-        # Delete book or raise error if not found
-        record = BorrowRecord.delete_book(book)
-        return JsonResponse({'success': True,  'redirect': reverse('library')})
-    except BookNotFoundError as e:
-        return JsonResponse({'success': False, 'modal_error': str(e)})
-    except ValidationError as e:
-        return JsonResponse({'success': False, 'log_error': f'An error has occurred!\n{str(e)}'})
-    
+     
 
 
 @require_POST
@@ -549,8 +533,9 @@ def search_books(request):
     books = Book.objects.filter(filters).distinct()
 
     # Sort results by requested method
-    if sort == 'popularity':
+    if sort == 'popular':
         books = books.order_by('-borrow_count')
+        print(books)
     elif sort == 'latest':
         books = books.order_by('-date_published')
     elif sort == 'oldest':

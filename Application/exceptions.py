@@ -6,7 +6,7 @@ class BookQuantityExceedError(ValidationError):
     Inherits from Django's ValidationError so it can be used in form/model clean() methods.
     """
     def __init__(self, msg=None):
-        default = "This book is not available for borrowing."
+        default = "This book is no longer available"
         super().__init__(msg or default)
 
 
@@ -16,7 +16,7 @@ class BookNotAvailableError(Exception):
     Raised when a book has 0 available quantity and cannot be borrowed.
     """
     def __init__(self, msg=None):
-        default = "This book is not available for borrowing."
+        default = "This book is no longer available"
         super().__init__(msg or default)
 
 
@@ -53,11 +53,11 @@ class BookRecordNotFoundError(Exception):
 
 
 
-class BookReturnCooldownError(Exception):
+class BookBorrowCooldownError(Exception):
     """
-    Raised when a user tries to return a book too quickly after borrowing,
+    Raised when a user tries to borrow a book too quickly after returning the book previously,
     Prevents excessive use of borrowing/returning.
     """
     def __init__(self, msg=None):
-        default = "You must wait a full day to return this book."
+        default = "You have borrowed this book recently"
         super().__init__(msg or default)

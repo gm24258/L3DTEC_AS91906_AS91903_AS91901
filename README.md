@@ -14,7 +14,7 @@ Must have Django and Pillow downloaded, if not run the command`pip install djang
 ## Reporting issues
 Please use the Issues tab to report issues or any questions relating to the project.
 
-# Assessment Details:
-- AS91906 - Backend (Django models, JS HTTP Methods)
+# Assessment Details  (NCEA Level 3 Digital Technologies):
+- AS91906 - Backend (Django  models, views, exceptions)
 - AS91903 - Frontend (HTML templates, CSS, JS)
 - AS91901 - User experience (Feedback and version history)

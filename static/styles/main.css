@@ -186,11 +186,19 @@ html, body {
 }
 
 .nav-link {
-    display: block;
     color: white;
     padding: 14px 16px;
     text-align: center;
     text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.nav-link svg {
+    width: 24px;
+    height: 24px;
+    margin-left: 4px;
 }
 /* NAVBAR END */
 
@@ -254,7 +262,7 @@ html, body {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     width: 100%;
 }
 
@@ -292,30 +300,47 @@ html, body {
     background-color: #f0144f;
 }
 
-.modal-subtitle {
-    display: block;
+.modal-caption {
+    display: flex;
+    align-items: center;
     font-size: clamp(10px, 2vw, 14px) !important;
     margin-top: 4px;
 }
 
-.modal-subtitle:first-child {
+.modal-caption .date {
+    margin-left: 4px;
+}
+
+.modal-caption.centered {
+    text-align: center;
+}
+
+.modal-caption:first-child {
     margin-top: 0;
 }
 
-.modal-subtitle.warning {
-    display: flex;
-    align-items: center;
-    color: #d97706;
+.modal-caption.warning,
+.modal-caption.critical {
     margin-left: -6px;
 }
 
-.modal-subtitle.warning svg {
+.modal-caption.warning svg, 
+.modal-caption.critical svg {
     display: inline-flex;
     align-items: center;
-    color: #d97706;
     width: 30px;
     height: 30px;
     margin-right: 2px;
+}
+
+.modal-caption.warning,
+.modal-caption.warning svg {
+    color: #d97706;
+}
+
+.modal-caption.critical,
+.modal-caption.critical svg {
+    color: #d32f2f;
 }
 
 .modal-error {
@@ -633,7 +658,7 @@ html, body {
     font-size: 4rem; 
     text-align: center; 
     color: #777;
-    border: 3px solid #777;
+    border: 5px solid #777;
     padding: 5px;
     position: absolute;
     top: 50%;
