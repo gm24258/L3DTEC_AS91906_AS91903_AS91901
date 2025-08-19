@@ -76,73 +76,8 @@ function initializeBorrows() {
                 } else {
                     // If not returned yet, remove return date element (not applicable)
                     returnDateEl.remove()
-                    
-                    //* RETURN TIMER
-                    let returnTimer
-                    function updateReturnTimer() {
-                        // Calculate time after which book can be returned (24h after borrow)
-                        const returnAvailableTime = new Date(borrowDate.getTime() + 1*(24 * 60 * 60 * 1000))
-                        const now = new Date()
-                        const timeLeft = returnAvailableTime - now
-                        
-                        // Disable return button if still in cooldown period
-                        returnBtn.disabled = timeLeft > 0 
 
-                        // Show tooltip for return availability countdown or prompt
-                        returnTooltip.textContent = timeLeft <= 0 
-                            ? 'Return this book' 
-                            : `You can return this in ${formatTimeLeft(timeLeft)}`
-                        
-                        if (timeLeft <= 0) {
-                            clearInterval(returnTimer)
-                        }
-                    }
-
-                    updateReturnTimer()
-                    returnTimer = setInterval(updateReturnTimer, 1000)
-
-                    //* DUE TIMER
-                    let dueTimer
-                    function updateDueTimer() {
-                        // Helper to add CSS class but remove conflicting ones
-                        function addClass(name) {
-                            if (name == 'warning') {
-                                timeBtn.classList.remove('critical')
-                            } else if (name == 'critical') {
-                                timeBtn.classList.remove('warning')
-                            }
-                            if (!timeBtn.classList.contains(name)) {
-                                timeBtn.classList.add(name)
-                            }
-                        }
-
-                        const now = new Date()
-                        const timeLeft = dueDate - now
-                        const totalTime = dueDate - borrowDate
-                        
-                        // Show countdown or overdue message
-                        timeTooltip.textContent = timeLeft <= 0 
-                            ? 'Overdue!' 
-                            : `Due in ${formatTimeLeft(timeLeft)}`
-
-                        // Update clock button styling based on how close or overdue the due date is
-                        if (timeLeft <= 0) {
-                            clearInterval(dueTimer)
-                            addClass('critical')
-                        }
-                        else if (timeLeft <= 3 * (24 * 60 * 60 * 1000)) {
-                            addClass('critical')
-                        } else if (timeLeft <= 7 * (24 * 60 * 60 * 1000)) {
-                            addClass('warning')
-                        } else {
-                            timeBtn.classList.remove('warning', 'critical')
-                        }
-                    }
-
-                    updateDueTimer()
-                    dueTimer = setInterval(updateDueTimer, 1000)
-
-                    //* RETURN BUTTON CLICK HANDLER
+                    //* RETURN BUTTON HANDLER
                     returnBtn.onclick = () => {
                         const recordData = {
                             due_date: formatDate(new Date(record.due_date)),
